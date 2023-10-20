@@ -8,7 +8,7 @@ use quick_xml::se::Serializer;
 use serde::Serialize;
 
 
-use kml::Kml;
+use kml::{Kml, Coordinates};
 use crate::gpx::{Gpx, Track, TrackSegment, Metadata, Waypoint};
 
 #[derive(Parser)]
@@ -51,12 +51,17 @@ fn main() {
     };
     for placemark in kml_item.document.placemark {
         let name = placemark.name;
-        let coords = placemark.location.coordinates.split(' ').collect::<Vec<&str>>();
+        //let coords = placemark.location.coordinates.split(' ').collect::<Vec<&str>>();
 
-        if coords.len() == 1 {
-            // Waypoint
+        // match placemark.location {
+        //     Coordinates::Point {coordinates:c} => println!("{c}"),
+        //     Coordinates::LineString {coordinates:c} => println!("{c}"),
+        //     _ => println!("Other")
+        // }
+
+        if let Coordinates::Point {coordinates:c} = placemark.location {
+            let coords = c.split(' ').collect::<Vec<&str>>();
             let coord = coords[0].split(',').collect::<Vec<&str>>();
-            //println!("{}: {}, {}", name, coord[0], coord[1]);
             if let Some(ref mut mywpt) = gpx_item.wpt {
                 mywpt.push(Waypoint {
                     name,
@@ -64,11 +69,10 @@ fn main() {
                     lat: coord[1].to_string(),
                 });
             }
-        } else {
-            // Route
+        } else if let Coordinates::LineString {coordinates:c} = placemark.location {
+            let coords = c.split(' ').collect::<Vec<&str>>();
             for coord in coords {
                 let coord = coord.split(',').collect::<Vec<&str>>();
-                //println!("{}: {}, {}", name, coord[0], coord[1]);
                 if let Some(ref mut mytrk) = gpx_item.trk {
                     mytrk.trkseg.trkpt.push(crate::gpx::TrackPoint {
                         lon: coord[0].to_string(),

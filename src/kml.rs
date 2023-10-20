@@ -15,13 +15,32 @@ pub struct Document {
 #[derive(Debug, Deserialize)]
 pub struct Placemark {
     pub name: String,
-    #[serde(rename = "Point", alias = "LineString")]
+    #[allow(unused)]
+    #[serde(rename = "LookAt")]
+    pub look_at: LookAt,
+    #[allow(unused)]
+    #[serde(rename = "styleUrl")]
+    pub style_url: String,
+    #[serde(rename = "$value")]
     pub location: Coordinates,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Coordinates {
-    pub coordinates: String,
+pub struct LookAt {
+    pub longitude: String,
+    pub latitude: String,
+    pub altitude: String,
+    pub heading: String,
+    pub tilt: String,
+    pub range: String,
+    #[serde(rename = "altitudeMode")]
+    pub altitude_mode: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub enum Coordinates {
+    Point{ coordinates: String },
+    LineString{ coordinates: String },
 }
 
 // Struct working
